@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 IMAGE_NAME="qemu-simpoint-dhrystone"
 OUTPUT_DIR="$(pwd)/simpoint_output"
 INTERVAL=100

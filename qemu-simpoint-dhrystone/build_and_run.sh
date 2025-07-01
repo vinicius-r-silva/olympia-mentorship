@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+
+
 # === Configuration ===
 BUILD_SCRIPT="./build_docker.sh"
 RUN_SCRIPT="./run_in_docker.sh"
