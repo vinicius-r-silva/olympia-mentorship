@@ -8,5 +8,5 @@ Each folder in this repository corresponds to a specific activity. Every activit
 ### 1. [QEMU + SimPoint + Dhrystone](./qemu-simpoint-dhrystone/README.md)
 A Docker-based workflow to run Dhrystone on RISC-V using QEMU, generate Basic Block Vectors (BBVs), and perform SimPoint analysis.
 
-## 📁 Other files
+## Other files
 - [`others/install_docker_ubuntu.sh`](./others/install_docker_ubuntu.sh): Utility script to install Docker on Ubuntu.
