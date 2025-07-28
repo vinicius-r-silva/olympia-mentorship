@@ -39,6 +39,15 @@ For more help on how to use trace_share, head to GITHUB_README_LINK
 
 ## Available Commands
 
+### `connect`
+
+Authenticate / connect with the traces database
+
+> To be defined how the authentication / connections will be defined, also the necessecity of such authentication
+
+
+---
+
 ### `upload`
 
 Uploads a trace file along with its associated workload and metadata.
@@ -57,8 +66,8 @@ If `--trace` is omitted, it defaults to `<workload>.zstf`.
 
 Examples:
 ```bash
-python trace_share.py upload --workload path/to/workload.out --trace path/to/trace.zstf
-python trace_share.py upload --workload path/to/workload.out
+$ python trace_share.py upload --workload path/to/workload.out --trace path/to/trace.zstf
+Uploaded trace with ID: company_test_1_workload
 ```
 
 > Requires a metadata file located at `<trace>.metadata.yaml`.
@@ -98,14 +107,39 @@ Options:
       
 If no option is passed, all traces are listed by default.
 ```
-> TODO example
 
-<!-- ```bash
+Examples:
+
+```bash
 $ python trace_share.py list --traces
+example_company_1_dhrystone
+
+Workload: dhrystone
+Author: Jane Doe
+Trace Timestamp: 2025-07-20T21:05:32.840053+00:00
+Revision: 2
+
+---------------------------------
+
+example_company_2_dhrystone_partial_trace_0_0_100
+
+Workload: dhrystone
+Author: Jane Doe
+Trace Timestamp: 2025-07-20T21:05:32.840053+00:00
+Revision: 0
+Trace Interval:
+  Instruction PC: 0
+  PC Count: 0
+  Interval Length: 100
+
+---------------------------------
 ```
+
 ```bash
 $ python trace_share.py list --companies
-``` -->
+example_company_1
+example_company_2
+```
 ---
 
 ### `get`
