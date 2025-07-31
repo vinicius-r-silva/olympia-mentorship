@@ -196,6 +196,6 @@ Where:
 | 4th      | `dhrystone` `-O3`, traced from 1,000,000 to 2,000,000     | `dhrystone_v0_part2_rev0`             |
 | 5th      | Same trace as 2nd (re-uploaded)                           | `dhrystone_v0_part0_rev1`             |
 | 6th      | `dhrystone` compiled with `-O2`, fully traced             | `dhrystone_v1_fully-traced_rev0`      |
-| 6th      | `dhrystone-test` compiled with `-O3`, fully traced        | `dhrystone-test_v0_fully-traced_rev0` |
+| 7th      | `dhrystone-test` compiled with `-O3`, fully traced        | `dhrystone-test_v0_fully-traced_rev0` |
 
 ---
