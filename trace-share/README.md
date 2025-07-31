@@ -72,6 +72,8 @@ Uploaded trace with ID: company_test_1_workload
 
 > Requires a metadata file located at `<trace>.metadata.yaml`.
 
+> For every upload, will be genreated a unique id
+
 ---
 
 ### `search`
@@ -162,3 +164,38 @@ Options:
       -o, --output      Output file path.
 ```
 > TODO example
+
+
+## Trace ID
+
+When a trace file is uploaded to the trace archive, a `trace_id` is automatically created and filled into the metadata. The `trace_id` follows the structure:
+
+```text
+<workload_filename>_<workload_version>_<trace_part>_<revision>
+```
+
+Where:
+- **`workload_filename`**: Taken directly from the `workload.filename` field.
+- **`workload_version`**: If multiple workloads with the same filename exist (but different SHA256), the first is versioned as `v0`, and subsequent versions increment (e.g., `dhrystone_v0`, `dhrystone_v1`, ...).
+- **`trace_part`**:
+
+  - If the workload is **fully traced**, this field is `fully-traced`.
+  - If partially traced, this field is `part<N>`, where `<N>` increments with each distinct interval (e.g., `part0`, `part1`, ...).
+
+- **`revision`**: If the same trace (same workload SHA256 and trace interval) is uploaded again, a new revision is created using `rev<N>` (e.g., `rev0`, `rev1`, ...).
+
+---
+
+### Example Trace IDs
+
+| Upload # | Description                                               | Trace ID                              |
+| -------- | --------------------------------------------------------- | ------------------------------------- |
+| 1st      | `dhrystone` compiled with `-O3`, fully traced             | `dhrystone_v0_fully-traced_rev0`      |
+| 2nd      | `dhrystone` `-O3`, traced from instruction 0 to 1,000,000 | `dhrystone_v0_part0_rev0`             |
+| 3rd      | `dhrystone` `-O3`, traced from 2,000,000 to 3,000,000     | `dhrystone_v0_part1_rev0`             |
+| 4th      | `dhrystone` `-O3`, traced from 1,000,000 to 2,000,000     | `dhrystone_v0_part2_rev0`             |
+| 5th      | Same trace as 2nd (re-uploaded)                           | `dhrystone_v0_part0_rev1`             |
+| 6th      | `dhrystone` compiled with `-O2`, fully traced             | `dhrystone_v1_fully-traced_rev0`      |
+| 6th      | `dhrystone-test` compiled with `-O3`, fully traced        | `dhrystone-test_v0_fully-traced_rev0` |
+
+---
