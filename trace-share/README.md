@@ -171,31 +171,108 @@ Options:
 When a trace file is uploaded to the trace archive, a `trace_id` is automatically created and filled into the metadata. The `trace_id` follows the structure:
 
 ```text
-<workload_filename>_<workload_version>_<trace_part>_<revision>
+<workload id>.<trace attempt>.<trace.part>_<workload filename>
 ```
 
 Where:
-- **`workload_filename`**: Taken directly from the `workload.filename` field.
-- **`workload_version`**: If multiple workloads with the same filename exist (but different SHA256), the first is versioned as `v0`, and subsequent versions increment (e.g., `dhrystone_v0`, `dhrystone_v1`, ...).
-- **`trace_part`**:
+- **`workload id`**: A **sequential integer**, uniquely identifying a workload **based on its SHA256**. Assigned in upload order (e.g., `0`, `1`, `2`, ...).
+- **`trace attempt`**: A **sequential number** representing a distinct tracing process for the same workload — whether it’s a full trace or a colletion of trace parts.
+- **`trace_part`**: A **sequential index** of the specific part within a trace attempt.
 
-  - If the workload is **fully traced**, this field is `fully-traced`.
-  - If partially traced, this field is `part<N>`, where `<N>` increments with each distinct interval (e.g., `part0`, `part1`, ...).
-
-- **`revision`**: If the same trace (same workload SHA256 and trace interval) is uploaded again, a new revision is created using `rev<N>` (e.g., `rev0`, `rev1`, ...).
-
+  * For a **fully traced workload**, this will always be `0`.
+  * For a **partial trace**, each part is numbered in upload order (e.g., `0`, `1`, `2`, ...).
+- **`workload filename`**: Taken directly from the `workload.filename` field.
 ---
 
 ### Example Trace IDs
 
 | Upload # | Description                                               | Trace ID                              |
 | -------- | --------------------------------------------------------- | ------------------------------------- |
-| 1st      | `dhrystone` compiled with `-O3`, fully traced             | `dhrystone_v0_fully-traced_rev0`      |
-| 2nd      | `dhrystone` `-O3`, traced from instruction 0 to 1,000,000 | `dhrystone_v0_part0_rev0`             |
-| 3rd      | `dhrystone` `-O3`, traced from 2,000,000 to 3,000,000     | `dhrystone_v0_part1_rev0`             |
-| 4th      | `dhrystone` `-O3`, traced from 1,000,000 to 2,000,000     | `dhrystone_v0_part2_rev0`             |
-| 5th      | Same trace as 2nd (re-uploaded)                           | `dhrystone_v0_part0_rev1`             |
-| 6th      | `dhrystone` compiled with `-O2`, fully traced             | `dhrystone_v1_fully-traced_rev0`      |
-| 7th      | `dhrystone-test` compiled with `-O3`, fully traced        | `dhrystone-test_v0_fully-traced_rev0` |
+| 1st      | `dhrystone` compiled with `-O3`, fully traced             | `0.0.0_dhrystone`                     |
+| 2nd      | `dhrystone` `-O3`, traced from instruction 0 to 1,000,000 | `0.1.0_dhrystone`                     |
+| 3rd      | `dhrystone` `-O3`, traced from 1,000,000 to 2,000,000     | `0.1.1_dhrystone`                     |
+| 4th      | `dhrystone` `-O3`, traced from 2,000,000 to 3,000,000     | `0.1.2_dhrystone`                     |
+| 5th      | Same trace as 1st (re-uploaded)                           | `0.2.0_dhrystone`                     |
+| 6th      | `dhrystone` compiled with `-O2`, fully traced             | `1.0.0_dhrystone`                     |
+| 7th      | `embench` compiled with `-O3`, fully traced               | `2.0.0_embench`                       |
 
 ---
+
+### Possible Improvements
+
+#### 1. **Add `revision` support**
+
+Allow trace re-uploads (e.g., bug fixes or corrections) without incrementing `trace_attempt`. Extend format to:
+
+```text
+<workload_id>.<trace_attempt>.<trace_part>.rev<revision>_<workload_filename>
+```
+
+**Example**:
+
+* First partial upload of dhrystone: `0.1.0.rev0_dhrystone`
+* Re-upload of the same part: `0.1.0.rev1_dhrystone`
+
+#### 2. **id names**
+
+Instead of only using numbers, use more descriptive ids, like:
+
+```text
+<workload_name>_v<workload_id>_attempt<attempt>_part<part>[_rev<revision>]
+```
+
+**Example**:
+
+* `dhrystone_v0_attempt1_part0`
+* `dhrystone_v0_attempt1_part1`
+* `dhrystone_v0_attempt1_part1_rev1`
+
+
+### Storage Folder Structure
+
+For the trace archive, the following folder structure is proposed:
+
+- **Workloads folder**: Contains all uploaded workloads.
+  - Each workload is stored in its own folder using the structure:  
+    `<workload_id>_<workload_sha256>`
+
+- **Traces folder**: Contains trace files organized by workload and trace attempt.
+  - Each workload has a folder named with its `workload_id`.
+    - Each trace attempt is stored in a numbered subfolder with its `trace_attempt_id`.
+
+
+The structure below illustrates a setup of the [Trace Id Example](#example-trace-ids):
+
+```text
+workloads/
+├── 0_5c35ccfe1d5b81b2e37366b011107eec40e39aa2b930447edc1f83ceaf877066/
+│   └── dhrystone
+├── 1_065778c4b6cfaad7b8495cabad748179ce1ce2eb02453cc6fd10ded1fcb8125a/
+│   └── dhrystone
+└── 2_9be975d7e18f9ea98f95ef2a0d07be278109d111c269e4fb4c73429701adbf51/
+    └── embench.zip
+
+traces/
+├── 0/
+│   ├── 0/
+│   │   ├── 0.0.0_dhrystone.zstf
+│   │   └── 0.0.0_dhrystone.zstf.metadata.yaml
+│   └── 1/
+│       ├── 0.1.0_dhrystone.zstf
+│       ├── 0.1.0_dhrystone.zstf.metadata.yaml
+│       ├── 0.1.1_dhrystone.zstf
+│       ├── 0.1.1_dhrystone.zstf.metadata.yaml
+│       ├── 0.1.2_dhrystone.zstf
+│       └── 0.1.2_dhrystone.zstf.metadata.yaml
+├── 1/
+│   └── 0/
+│       ├── 1.0.0_dhrystone.zstf
+│       └── 1.0.0_dhrystone.zstf.metadata.yaml
+└── 2/
+    └── 0/
+        ├── 2.0.0_embench.zstf
+        └── 2.0.0_embench.zstf.metadata.yaml
+```
+
+
+
