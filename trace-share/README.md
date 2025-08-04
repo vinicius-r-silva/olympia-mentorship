@@ -202,7 +202,7 @@ Where:
 
 #### 1. **Add `revision` support**
 
-Allow trace re-uploads (e.g., bug fixes or corrections) without incrementing `trace_attempt`. Extend format to:
+Allow trace re-uploads (e.g., bug fixes or corrections) without incrementing `trace_attempt`. Extending the trace id format to:
 
 ```text
 <workload_id>.<trace_attempt>.<trace_part>.rev<revision>_<workload_filename>
@@ -228,7 +228,7 @@ Instead of only using numbers, use more descriptive ids, like:
 * `dhrystone_v0_attempt1_part1_rev1`
 
 
-### Storage Folder Structure
+## Storage Folder Structure
 
 For the trace archive, the following folder structure is proposed:
 
